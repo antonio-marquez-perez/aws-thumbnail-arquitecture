@@ -32,11 +32,16 @@ export const handler = async (event: {
 
   const record: S3Event = JSON.parse(event.Records[0].body)
 
+  console.log("Record: ", record.Records)
+  console.log("Record S3: ", record.Records[0].s3)
+
   try {
     const getObjectCommand = new GetObjectCommand({
       Bucket: bucketName,
       Key: record.Records[0].s3.object.key,
     })
+
+    console.log("GET COMMAND", getObjectCommand)
 
     const { Body } = await s3.send(getObjectCommand)
 
