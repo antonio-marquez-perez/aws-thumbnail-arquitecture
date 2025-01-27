@@ -78,6 +78,7 @@ export const handler = async (event: {
         })
       ),
     ])
+    console.log("Images uploaded succesfully ...")
   } catch (error) {
     console.error(error)
   }
