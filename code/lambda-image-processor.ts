@@ -32,16 +32,11 @@ export const handler = async (event: {
 
   const record: S3Event = JSON.parse(event.Records[0].body)
 
-  console.log("Record: ", record.Records)
-  console.log("Record S3: ", record.Records[0].s3)
-
   try {
     const getObjectCommand = new GetObjectCommand({
       Bucket: bucketName,
       Key: record.Records[0].s3.object.key,
     })
-
-    console.log("GET COMMAND", getObjectCommand)
 
     const { Body } = await s3.send(getObjectCommand)
 
@@ -52,8 +47,6 @@ export const handler = async (event: {
     console.log("Image downloaded succesfully ...")
 
     const inputBuffer = await streamToBuffer(Readable.from(Body as Readable))
-
-    console.log("Buffer ....", inputBuffer)
 
     // Image processing
     const optimizedImage = await sharp(inputBuffer).resize(500).toBuffer()
@@ -83,59 +76,4 @@ export const handler = async (event: {
   } catch (error) {
     console.error(error)
   }
-
-  /* for (const s3Event of s3Events) {
-    const key = decodeURIComponent(s3Event.s3.object.key.replace(/\+/g, " "))
-
-    if (!key.startsWith(tmpFolder)) {
-      console.log("Skipping non-tmp folder file.")
-      continue
-    }
-
-    const outputFileName = key.replace(tmpFolder, productionFolder)
-
-    try {
-      // Obtener la imagen desde S3
-      const getObjectCommand = new GetObjectCommand({
-        Bucket: bucketName,
-        Key: key,
-      })
-
-      const { Body } = await s3.send(getObjectCommand)
-      if (!Body) {
-        console.error("No Body found in S3 object.")
-        continue
-      }
-
-      const inputBuffer = await streamToBuffer(Readable.from(Body as Readable))
-
-      // Procesar imagen
-      const optimizedImage = await sharp(inputBuffer).resize(1024).toBuffer()
-      const thumbnail = await sharp(inputBuffer).resize(200).toBuffer()
-
-      // Subir imágenes procesadas
-      await Promise.all([
-        s3.send(
-          new PutObjectCommand({
-            Bucket: bucketName,
-            Key: `${outputFileName}-optimized.jpg`,
-            Body: optimizedImage,
-            ContentType: "image/jpeg",
-          })
-        ),
-        s3.send(
-          new PutObjectCommand({
-            Bucket: bucketName,
-            Key: `${outputFileName}-thumbnail.jpg`,
-            Body: thumbnail,
-            ContentType: "image/jpeg",
-          })
-        ),
-      ])
-
-      console.log(`Processed and uploaded: ${outputFileName}`)
-    } catch (error) {
-      console.error("Error processing image:", error)
-    }
-  } */
 }
