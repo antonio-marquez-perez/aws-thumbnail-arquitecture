@@ -62,12 +62,14 @@ export const handler = async (event: {
     const fileName = record.Records[0].s3.object.key.split("/").pop()
     console.log("FILENAME: ", fileName)
 
-    await new PutObjectCommand({
-      Bucket: bucketName,
-      Key: `${productionFolder}${fileName}-thumbnail.jpg`,
-      Body: thumbnail,
-      ContentType: "image/jpeg",
-    })
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Key: `${productionFolder}${fileName}-thumbnail.jpg`,
+        Body: thumbnail,
+        ContentType: "image/jpeg",
+      })
+    )
 
     console.log("Thumbnail uploaded succesfully ...")
 
