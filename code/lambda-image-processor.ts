@@ -53,46 +53,22 @@ export const handler = async (event: {
 
     const inputBuffer = await streamToBuffer(Readable.from(Body as Readable))
 
-    console.log("Buffer created succesfully ...", inputBuffer)
-
-    // Image processing
-    const optimizedImage = await sharp(inputBuffer).resize(500).toBuffer()
-    const thumbnail = await sharp(inputBuffer).resize(100).toBuffer()
+    console.log("Buffer created succesfully ...")
 
     const fileName = record.Records[0].s3.object.key.split("/").pop()
-    console.log("FILENAME: ", fileName)
 
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: `${productionFolder}${fileName}-thumbnail.jpg`,
-        Body: thumbnail,
-        ContentType: "image/jpeg",
-      })
-    )
-
-    console.log("Thumbnail uploaded succesfully ...")
+    // Image processing
+    const thumbnail = await sharp(inputBuffer).resize(100).toBuffer()
 
     // Subir imágenes procesadas
-    await Promise.all([
-      s3.send(
-        new PutObjectCommand({
-          Bucket: bucketName,
-          Key: `${productionFolder}${fileName}-optimized.jpg`,
-          Body: optimizedImage,
-          ContentType: "image/jpeg",
-        })
-      ),
-      s3.send(
-        new PutObjectCommand({
-          Bucket: bucketName,
-          Key: `${productionFolder}${fileName}-thumbnail.jpg`,
-          Body: thumbnail,
-          ContentType: "image/jpeg",
-        })
-      ),
-    ])
-    console.log("Images uploaded succesfully ...")
+    const putCommand = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: `${productionFolder}thumbnail-${fileName}`,
+      Body: thumbnail,
+      ContentType: "image/jpeg",
+    })
+
+    s3.send(putCommand)
   } catch (error) {
     console.error(error)
   }

@@ -46,6 +46,7 @@ export class ImagenProcessingStack extends Stack {
         BUCKET_NAME: bucket.bucketName,
         PRODUCTION_FOLDER: productionFolder,
       },
+      memorySize: 256,
       runtime: Runtime.NODEJS_22_X,
       bundling: {
         minify: false,
